@@ -11,7 +11,7 @@ import {
   type Props,
 } from '../shared/jsx/jsx-runtime';
 import { Slot } from '../shared/jsx/slot.public';
-import type { JSXNode, JSXOutput } from '../shared/jsx/types/jsx-node';
+import type { JSXNodeInternal, JSXOutput } from '../shared/jsx/types/jsx-node';
 import type { JSXChildren } from '../shared/jsx/types/jsx-qwik-attributes';
 import { SSRComment, SSRRaw, SkipRender } from '../shared/jsx/utils.public';
 import { trackSignal, untrack } from '../use/use-core';
@@ -409,7 +409,7 @@ export const vnode_diff = (
         return new JSXNodeImpl(Projection, EMPTY_OBJ, null, [], 0, slotName);
       };
 
-      const projections: Array<string | JSXNode> = [];
+      const projections: Array<string | JSXNodeInternal> = [];
       if (host) {
         // we need to create empty projections for all the slots to remove unused slots content
         for (let i = vnode_getPropStartIndex(host); i < host.length; i = i + 2) {
@@ -531,7 +531,7 @@ export const vnode_diff = (
 
   function drainAsyncQueue(): ValueOrPromise<void> {
     while (asyncQueue.length) {
-      const jsxNode = asyncQueue.shift() as ValueOrPromise<JSXNode>;
+      const jsxNode = asyncQueue.shift() as ValueOrPromise<JSXNodeInternal>;
       const vHostNode = asyncQueue.shift() as VNode;
       if (isPromise(jsxNode)) {
         return jsxNode.then((jsxNode) => {
@@ -588,7 +588,7 @@ export const vnode_diff = (
    *
    * @returns {boolean}
    */
-  function createNewElement(jsx: JSXNode, elementName: string): boolean {
+  function createNewElement(jsx: JSXNodeInternal, elementName: string): boolean {
     const element = createElementWithNamespace(elementName);
 
     const { constProps } = jsx;
@@ -694,7 +694,7 @@ export const vnode_diff = (
     return element;
   }
 
-  function expectElement(jsx: JSXNode, elementName: string) {
+  function expectElement(jsx: JSXNodeInternal, elementName: string) {
     const isSameElementName =
       vCurrent && vnode_isElementVNode(vCurrent) && elementName === vnode_getElementName(vCurrent);
     const jsxKey: string | null = jsx.key;

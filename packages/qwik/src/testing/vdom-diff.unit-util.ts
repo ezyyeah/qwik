@@ -40,9 +40,10 @@ import {
 import { createDocument } from './document';
 import { isElement } from './html';
 import { Q_PROPS_SEPARATOR } from '../core/shared/utils/markers';
+import type { JSXNodeInternal } from '../core/shared/jsx/types/jsx-node';
 
 expect.extend({
-  toMatchVDOM(this: { isNot: boolean }, received: _VNode, expected: JSXNode) {
+  toMatchVDOM(this: { isNot: boolean }, received: _VNode, expected: JSXNodeInternal) {
     const { isNot } = this;
     const diffs = diffJsxVNode(received, expected);
     return {
@@ -67,7 +68,11 @@ expect.extend({
   },
 });
 
-function diffJsxVNode(received: _VNode, expected: JSXNode | string, path: string[] = []): string[] {
+function diffJsxVNode(
+  received: _VNode,
+  expected: JSXNodeInternal | string,
+  path: string[] = []
+): string[] {
   if (!received) {
     return [path.join(' > ') + ' missing'];
   }
@@ -130,7 +135,7 @@ function diffJsxVNode(received: _VNode, expected: JSXNode | string, path: string
       for (let i = 0; i < receivedChildren.length; i++) {
         const receivedChild = receivedChildren[i];
         const expectedChild = expectedChildren[i];
-        diffs.push(...diffJsxVNode(receivedChild, expectedChild, path));
+        diffs.push(...diffJsxVNode(receivedChild, expectedChild as JSXNodeInternal, path));
       }
     } else {
       diffs.push(
@@ -223,8 +228,8 @@ function shouldSkip(vNode: _VNode | null) {
 export function walkJSX(
   jsx: JSXOutput,
   apply: {
-    enter: (jsx: JSXNode) => void;
-    leave: (jsx: JSXNode) => void;
+    enter: (jsx: JSXNodeInternal) => void;
+    leave: (jsx: JSXNodeInternal) => void;
     text: (text: _Stringifiable) => void;
   }
 ) {
@@ -285,7 +290,7 @@ export function vnode_fromJSX(jsx: JSXOutput) {
         throw new Error('Unknown type:' + type);
       }
     },
-    leave: (jsx) => {
+    leave: (_jsx) => {
       vParent = vnode_getParent(vParent) as any;
     },
     text: (value) => {
