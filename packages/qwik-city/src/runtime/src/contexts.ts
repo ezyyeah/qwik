@@ -29,3 +29,5 @@ export const RouteInternalContext =
 
 export const RoutePreventNavigateContext =
   /*#__PURE__*/ createContextId<RoutePreventNavigate>('qc-p');
+
+export const RouteSkeletonContext = /*#__PURE__*/ createContextId<Signal<any>>('qc-skeleton');

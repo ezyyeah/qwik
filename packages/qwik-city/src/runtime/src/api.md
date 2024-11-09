@@ -313,6 +313,8 @@ export interface PageModule extends RouteModule {
     readonly headings?: ContentHeading[];
     // (undocumented)
     readonly onStaticGenerate?: StaticGenerateHandler;
+    // (undocumented)
+    readonly Skeleton?: any;
 }
 
 // @public (undocumented)

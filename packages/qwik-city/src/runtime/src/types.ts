@@ -50,11 +50,13 @@ export interface PageModule extends RouteModule {
   readonly head?: ContentModuleHead;
   readonly headings?: ContentHeading[];
   readonly onStaticGenerate?: StaticGenerateHandler;
+  readonly Skeleton?: any;
 }
 
 export interface LayoutModule extends RouteModule {
   readonly default: unknown;
   readonly head?: ContentModuleHead;
+  readonly Skeleton?: any;
 }
 
 export interface MenuModule {

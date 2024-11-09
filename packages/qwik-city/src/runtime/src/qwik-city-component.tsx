@@ -27,10 +27,11 @@ import {
   RouteLocationContext,
   RouteNavigateContext,
   RoutePreventNavigateContext,
+  RouteSkeletonContext,
   RouteStateContext,
 } from './contexts';
 import { createDocumentHead, resolveHead } from './head';
-import { loadRoute } from './routing';
+import { loadRoute, loadSkeleton } from './routing';
 import type {
   ClientPageData,
   ContentModule,
@@ -59,6 +60,7 @@ import {
   restoreScroll,
 } from './scroll-restoration';
 import spaInit from './spa-init';
+import { matchRoute } from './route-matcher';
 
 /** @public */
 export const QWIK_CITY_SCROLLER = '_qCityScroller';
@@ -140,6 +142,8 @@ export const QwikCityProvider = component$<QwikCityProps>((props) => {
     headings: undefined,
     menu: undefined,
   });
+
+  const skeletonComponent = useSignal<unknown>(null);
 
   const contentInternal = useSignal<ContentStateInternal>();
 
@@ -296,6 +300,7 @@ export const QwikCityProvider = component$<QwikCityProps>((props) => {
   useContextProvider(RouteActionContext, actionState);
   useContextProvider(RouteInternalContext, routeInternal);
   useContextProvider<any>(RoutePreventNavigateContext, registerPreventNav);
+  useContextProvider(RouteSkeletonContext, skeletonComponent);
 
   useTask$(({ track }) => {
     async function run() {
@@ -326,6 +331,22 @@ export const QwikCityProvider = component$<QwikCityProps>((props) => {
         } else if (qwikCity.trailingSlash) {
           trackUrl.pathname += '/';
         }
+
+        const routeData = qwikCity.routes.find((r) => {
+          const routePath = r[0];
+          return matchRoute(routePath, trackUrl.pathname);
+        });
+
+        if (routeData) {
+          const loaders = routeData[1];
+          const pageModuleLoader = loaders[loaders.length - 1];
+
+          const skeleton = await loadSkeleton(pageModuleLoader);
+          skeletonComponent.value = skeleton;
+        } else {
+          skeletonComponent.value = null;
+        }
+
         let loadRoutePromise = loadRoute(
           qwikCity.routes,
           qwikCity.menus,
@@ -357,6 +378,8 @@ export const QwikCityProvider = component$<QwikCityProps>((props) => {
 
         try {
           loadedRoute = await loadRoutePromise;
+
+          skeletonComponent.value = null;
         } catch (e) {
           window.location.href = newHref;
           return;
@@ -601,6 +624,7 @@ export const QwikCityProvider = component$<QwikCityProps>((props) => {
             win._qCityScrollEnabled = true;
 
             routeLocation.isNavigating = false;
+            skeletonComponent.value = null;
             navResolver.r?.();
           });
         }

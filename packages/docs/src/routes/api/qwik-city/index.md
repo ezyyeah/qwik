@@ -1700,6 +1700,23 @@ _(Optional)_
 _(Optional)_
 
 </td></tr>
+<tr><td>
+
+[Skeleton?](#)
+
+</td><td>
+
+`readonly`
+
+</td><td>
+
+any
+
+</td><td>
+
+_(Optional)_
+
+</td></tr>
 </tbody></table>
 
 [Edit this section](https://github.com/QwikDev/qwik/tree/main/packages/qwik-city/src/runtime/src/types.ts)

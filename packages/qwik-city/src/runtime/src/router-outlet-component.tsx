@@ -9,7 +9,7 @@ import {
   sync$,
 } from '@builder.io/qwik';
 
-import { ContentInternalContext } from './contexts';
+import { ContentInternalContext, RouteSkeletonContext } from './contexts';
 import spaInit from './spa-init';
 import type { ClientSPAWindow } from './qwik-city-component';
 import type { ScrollHistoryState } from './scroll-restoration';
@@ -23,16 +23,31 @@ export const RouterOutlet = component$(() => {
   _jsxBranch();
 
   const { value } = useContext(ContentInternalContext);
+
+  const skeletonComponent = useContext(RouteSkeletonContext);
+
   if (value && value.length > 0) {
     const contentsLen = value.length;
     let cmp: JSXNode | null = null;
+
     for (let i = contentsLen - 1; i >= 0; i--) {
+      // the last layout: `i == contentsLen - 2` but because we cant preload the layout,
+      // we need to put it inside the top layout which is always loaded
+      if (i == 0) {
+        if (skeletonComponent.value != null) {
+          cmp = jsx(skeletonComponent.value, {
+            children: cmp,
+          });
+        }
+      }
+
       if (value[i].default) {
         cmp = jsx(value[i].default as any, {
           children: cmp,
         });
       }
     }
+
     return (
       <>
         {cmp}

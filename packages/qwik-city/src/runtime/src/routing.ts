@@ -6,6 +6,7 @@ import type {
   MenuData,
   MenuModule,
   ModuleLoader,
+  PageModule,
   RouteData,
   RouteModule,
 } from './types';
@@ -85,6 +86,33 @@ const loadModule = <T>(
         moduleSetter(moduleOrPromise);
       }
     }
+  }
+};
+
+export const loadSkeleton = async (moduleLoader: ModuleLoader | undefined) => {
+  if (typeof moduleLoader !== 'function') {
+    return null;
+  }
+
+  try {
+    const cachedModule = MODULE_CACHE.get(moduleLoader);
+    if (cachedModule) {
+      return (cachedModule as PageModule).Skeleton || null;
+    }
+
+    // dynamic load
+    const moduleOrPromise = moduleLoader();
+    const loadedModule = await (typeof moduleOrPromise.then === 'function'
+      ? moduleOrPromise
+      : Promise.resolve(moduleOrPromise));
+
+    // cache the module
+    MODULE_CACHE.set(moduleLoader, loadedModule);
+
+    return (loadedModule as PageModule).Skeleton || null;
+  } catch (error) {
+    console.error('Failed to load skeleton:', error);
+    return null;
   }
 };
 
